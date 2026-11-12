@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Centersveket</title>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
   :root {
     --bg: #f3f4f6; --surface: #ffffff; --ink: #15181e; --muted: #5b6470; --line: #d5d9df;
@@ -25,6 +28,11 @@
   h1 { font-size: clamp(1.8rem, 4.5vw, 2.8rem); line-height: 1.1; letter-spacing: -0.02em;
        margin: 0 0 .75rem; font-weight: 700; max-width: 22ch; }
   .t-c { color: var(--cgron); } .t-sv { color: var(--brun); }
+  .klover { width: .8em; height: .8em; color: var(--cgron); vertical-align: -.05em; margin-left: .2em; }
+  .info { max-width: 70ch; margin: 0 0 1.5rem; padding: .9rem 1.1rem; background: var(--surface);
+          border: 1px solid var(--line); border-left: 4px solid var(--brun); border-radius: 8px; }
+  .info p { margin: 0 0 .75rem; }
+  .info p:last-child { margin-bottom: 0; }
   .sub { margin: 0 0 1.25rem; color: var(--muted); }
   h2 { font-size: 1.1rem; margin: 2.5rem 0 .75rem; letter-spacing: -0.005em; }
   .lead { font-size: 1.15rem; max-width: 62ch; margin: 0 0 1.5rem; }
@@ -85,8 +93,19 @@
 </head>
 <body>
 <main>
-  <h1><span class="t-c">Center</span><span class="t-sv">sveket</span></h1>
+  <h1><span class="t-c">Center</span><span class="t-sv">sveket</span><svg class="klover" viewBox="-30 -30 60 60" aria-hidden="true" focusable="false">
+    <path d="M0 0C2 10 8 20 16 28" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+    <g fill="currentColor">
+      <path id="blad" d="M0 0C-4-3-13-8-13-17-13-24-5-26 0-19 5-26 13-24 13-17 13-8 4-3 0 0Z"/>
+      <use href="#blad" transform="rotate(90)"/><use href="#blad" transform="rotate(180)"/><use href="#blad" transform="rotate(270)"/>
+    </g>
+  </svg></h1>
   <p class="lead" id="sammanfattning">Hämtar data …</p>
+
+  <div class="info">
+    <p>Den här sidan är till för att visa hur Centerpartiet skulle göra sig beroende av Sverigedemokraterna eller fälla progressiva förslag med de andra borgerliga partierna om de ingår i en borgerlig regering eller trycker fram en svag S-regering.</p>
+    <p>Ännu har inte Centerpartiet gjort en ny stark regering möjlig. Ta kontakt med <a href="https://www.riksdagen.se/sv/ledamoter-och-partier/partierna/centerpartiet/" target="_blank" rel="noopener">din riksdagsledamot från Centerpartiet</a> om du vill uttrycka ditt missnöje.</p>
+  </div>
 
   <div class="legend" aria-label="Teckenförklaring">
     <span><i class="cell ja"></i> Ja</span>
@@ -108,7 +127,7 @@
        <em>Röstar med SD</em> när S, V och MP röstar lika och C röstar med SD. <em>Blandad röstning</em> när S, V och MP inte röstar lika.
        Voteringar där något av S, C, V eller MP saknar tydlig position räknas inte med.</p>
     <p>Siffrorna i tabellen visar hur många av partiets avgivna röster som gick till partiets position, till exempel “Ja (98/99)”. Länken <em>Röstsiffror</em> går till riksdagens egen sida för voteringen med röster per parti och per ledamot.</p>
-    <p>Endast huvudvoteringar ingår, och beslut som fattats utan votering (med acklamation) syns inte.</p>
+    <p>Endast huvudvoteringar ingår, och beslut som fattats utan votering syns inte.</p>
     <p>Källa: Sveriges riksdag. Sidan drivs inte av Sveriges riksdag. Senast uppdaterad: <span id="uppdaterad">–</span>.</p>
   </footer>
 </main>
