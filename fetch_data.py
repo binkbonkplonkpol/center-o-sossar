@@ -67,10 +67,16 @@ def position(c):
     return ledare[0] if len(ledare) == 1 else "Delad"
 
 
+visat_falt = []
+
+
 def bygg(rm):
     voteringar = {}
     for p in PARTIER:
         for r in hamta(rm, p):
+            if not visat_falt:
+                print("Fält i svaret:", sorted(r))
+                visat_falt.append(1)
             try:
                 vid = r["votering_id"]
                 rost = r["rost"]
@@ -79,7 +85,7 @@ def bygg(rm):
             e = voteringar.setdefault(vid, {
                 "id": vid,
                 "rm": rm,
-                "datum": (r.get("datum") or "")[:10],
+                "datum": str(r.get("datum") or r.get("systemdatum") or r.get("created") or r.get("publicerad") or "")[:10],
                 "bet": r.get("beteckning", ""),
                 "punkt": str(r.get("punkt", "")),
                 "avser": r.get("avser", ""),

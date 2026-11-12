@@ -7,12 +7,12 @@
 <style>
   :root {
     --bg: #f3f4f6; --surface: #ffffff; --ink: #15181e; --muted: #5b6470; --line: #d5d9df;
-    --s: #c9162f; --c: #17803f; --diff: #e8a100;
+    --s: #c9162f; --c: #17803f; --diff: #e8a100; --sel: #1d5fd1;
     box-sizing: border-box;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #14171c; --surface: #1c2027; --ink: #eceef2; --muted: #9aa3b0; --line: #343a44;
-            --s: #ff5a6e; --c: #4cc77d; --diff: #f2b632; }
+            --s: #ff5a6e; --c: #4cc77d; --diff: #f2b632; --sel: #6db3ff; }
   }
   *, *::before, *::after { box-sizing: inherit; }
   body { margin: 0; background: var(--bg); color: var(--ink);
@@ -37,13 +37,14 @@
   .rowlabels { display: grid; grid-template-rows: 26px 26px; gap: 4px; padding-top: 0; font-weight: 700; }
   .rowlabels .s { color: var(--s); } .rowlabels .c { color: var(--c); }
   .rowlabels div { display: flex; align-items: center; }
-  .scroller { overflow-x: auto; padding-bottom: .5rem; }
-  .strip { display: grid; grid-auto-flow: column; grid-auto-columns: 14px; gap: 3px;
+  .scroller { overflow-x: auto; padding: 6px 6px .75rem; }
+  .strip { display: grid; grid-auto-flow: column; grid-auto-columns: 16px; gap: 4px 9px;
            grid-template-rows: 26px 26px 6px; width: max-content; }
-  .cell { all: unset; box-sizing: border-box; width: 14px; height: 26px; cursor: pointer;
+  .cell { all: unset; box-sizing: border-box; width: 16px; height: 26px; cursor: pointer;
           border: 2px solid var(--ink); border-radius: 2px; }
-  .cell:focus-visible { outline: 3px solid var(--diff); outline-offset: 1px; }
-  .cell[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .cell:hover { box-shadow: 0 0 0 3px var(--sel); }
+  .cell:focus-visible { outline: 3px solid var(--sel); outline-offset: 2px; }
+  .cell[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 5px var(--sel); position: relative; z-index: 1; }
   .ja { background: var(--ink); }
   .nej { background: transparent; }
   .avstar { background: linear-gradient(135deg, var(--ink) 50%, transparent 50%); }
@@ -77,6 +78,7 @@
       <span><i class="cell avstar" style="width:14px"></i> Avstår</span>
       <span><i class="cell ingen" style="width:14px"></i> Ingen tydlig position</span>
       <span><i class="mark diff" style="width:14px;display:inline-block"></i> Olika position</span>
+      <span><i class="cell ja" style="width:14px;box-shadow:0 0 0 2px var(--surface),0 0 0 5px var(--sel);margin:0 4px"></i> Vald votering</span>
     </div>
   </div>
 
