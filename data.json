@@ -1,6 +1,6 @@
 {
  "kalla": "Sveriges riksdag",
- "uppdaterad": "2026-11-12T09:34:13+00:00",
+ "uppdaterad": "2026-11-12T09:58:52+00:00",
  "partier": [
   "S",
   "C"
@@ -12,10 +12,12 @@
   {
    "id": "3C26FA04-DAA4-4E03-B135-C55FD0B8567F",
    "rm": "2026/27",
-   "datum": "",
+   "datum": "2026-10-15",
    "bet": "1015-1",
    "punkt": "0",
    "avser": "frågan",
+   "dok_id": "HE191015-1",
+   "xml": "https://data.riksdagen.se/votering/3C26FA04-DAA4-4E03-B135-C55FD0B8567F",
    "S": {
     "Ja": 99,
     "Nej": 0,
@@ -29,15 +31,19 @@
     "Avstår": 0,
     "Frånvarande": 0,
     "position": "Nej"
-   }
+   },
+   "titel": "Omröstning: Prövning av talmannens förslag till statsminister den 15 oktober",
+   "html": "https://data.riksdagen.se/dokument/HE191015-1"
   },
   {
    "id": "1B990602-1D92-432B-A378-E867376E0A6B",
    "rm": "2026/27",
-   "datum": "",
+   "datum": "2026-11-03",
    "bet": "1103-1",
    "punkt": "0",
    "avser": "frågan",
+   "dok_id": "HE191103-1",
+   "xml": "https://data.riksdagen.se/votering/1B990602-1D92-432B-A378-E867376E0A6B",
    "S": {
     "Ja": 0,
     "Nej": 99,
@@ -51,15 +57,19 @@
     "Avstår": 0,
     "Frånvarande": 0,
     "position": "Ja"
-   }
+   },
+   "titel": "Omröstning: Prövning av talmannens förslag till statsminister den 3 november",
+   "html": "https://data.riksdagen.se/dokument/HE191103-1"
   },
   {
    "id": "D41FD97A-5F61-4320-A5AE-B64AF39D8CBC",
    "rm": "2026/27",
-   "datum": "",
+   "datum": "2026-10-22",
    "bet": "FöU2",
    "punkt": "2",
    "avser": "sakfrågan",
+   "dok_id": "HE01FöU2",
+   "xml": "https://data.riksdagen.se/votering/D41FD97A-5F61-4320-A5AE-B64AF39D8CBC",
    "S": {
     "Ja": 99,
     "Nej": 0,
@@ -73,15 +83,19 @@
     "Avstår": 0,
     "Frånvarande": 0,
     "position": "Ja"
-   }
+   },
+   "titel": "Personalförsörjning av det militära försvaret",
+   "html": "https://data.riksdagen.se/dokument/HE01FöU2"
   },
   {
    "id": "F21A5C48-FA78-4414-9602-4495A63C75DE",
    "rm": "2026/27",
-   "datum": "",
+   "datum": "2026-10-23",
    "bet": "KU4",
    "punkt": "1",
    "avser": "sakfrågan",
+   "dok_id": "HE01KU4",
+   "xml": "https://data.riksdagen.se/votering/F21A5C48-FA78-4414-9602-4495A63C75DE",
    "S": {
     "Ja": 99,
     "Nej": 0,
@@ -95,15 +109,19 @@
     "Avstår": 0,
     "Frånvarande": 0,
     "position": "Ja"
-   }
+   },
+   "titel": "Stärkt skydd för demokratin och domstolarnas oberoende (vilande grundlagsförslag)",
+   "html": "https://data.riksdagen.se/dokument/HE01KU4"
   },
   {
    "id": "5DE56842-83CE-4DD2-B5FF-CF4C54E1EC09",
    "rm": "2026/27",
-   "datum": "",
+   "datum": "2026-11-05",
    "bet": "KU6",
    "punkt": "1",
    "avser": "sakfrågan",
+   "dok_id": "HE01KU6",
+   "xml": "https://data.riksdagen.se/votering/5DE56842-83CE-4DD2-B5FF-CF4C54E1EC09",
    "S": {
     "Ja": 99,
     "Nej": 0,
@@ -117,15 +135,19 @@
     "Avstår": 0,
     "Frånvarande": 2,
     "position": "Ja"
-   }
+   },
+   "titel": "Stärkt konstitutionell beredskap (vilande grundlagsförslag m.m.)",
+   "html": "https://data.riksdagen.se/dokument/HE01KU6"
   },
   {
    "id": "E80584EC-68E4-4618-9765-34DFE3C3B525",
    "rm": "2026/27",
-   "datum": "",
+   "datum": "2026-11-05",
    "bet": "KU6",
    "punkt": "3",
    "avser": "sakfrågan",
+   "dok_id": "HE01KU6",
+   "xml": "https://data.riksdagen.se/votering/E80584EC-68E4-4618-9765-34DFE3C3B525",
    "S": {
     "Ja": 99,
     "Nej": 0,
@@ -139,15 +161,19 @@
     "Avstår": 0,
     "Frånvarande": 2,
     "position": "Ja"
-   }
+   },
+   "titel": "Stärkt konstitutionell beredskap (vilande grundlagsförslag m.m.)",
+   "html": "https://data.riksdagen.se/dokument/HE01KU6"
   },
   {
    "id": "A4FFC05D-04B4-4139-A9EB-A0ED698B0443",
    "rm": "2026/27",
-   "datum": "",
+   "datum": "2026-11-05",
    "bet": "KU9",
    "punkt": "1",
    "avser": "sakfrågan",
+   "dok_id": "HE01KU9",
+   "xml": "https://data.riksdagen.se/votering/A4FFC05D-04B4-4139-A9EB-A0ED698B0443",
    "S": {
     "Ja": 99,
     "Nej": 0,
@@ -161,7 +187,9 @@
     "Avstår": 0,
     "Frånvarande": 2,
     "position": "Ja"
-   }
+   },
+   "titel": "En grundlagsskyddad aborträtt samt utökade möjligheter att begränsa föreningsfriheten och rätten till medborgarskap (vilande grundlagsförslag)",
+   "html": "https://data.riksdagen.se/dokument/HE01KU9"
   }
  ]
 }
