@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S och C i voteringarna</title>
+<style>
+  :root {
+    --bg: #f3f4f6; --surface: #ffffff; --ink: #15181e; --muted: #5b6470; --line: #d5d9df;
+    --s: #c9162f; --c: #17803f; --diff: #e8a100;
+    box-sizing: border-box;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --surface: #1c2027; --ink: #eceef2; --muted: #9aa3b0; --line: #343a44;
+            --s: #ff5a6e; --c: #4cc77d; --diff: #f2b632; }
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 64rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1 { font-size: clamp(1.8rem, 4.5vw, 2.8rem); line-height: 1.1; letter-spacing: -0.02em;
+       margin: 0 0 .75rem; font-weight: 700; max-width: 22ch; }
+  h2 { font-size: 1.1rem; margin: 2.5rem 0 .75rem; letter-spacing: -0.005em; }
+  .lead { font-size: 1.15rem; max-width: 60ch; margin: 0 0 1.5rem; }
+  .lead strong { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  .bar { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; margin: 0 0 1rem; }
+  select { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--line);
+           border-radius: 6px; padding: .35rem .6rem; }
+  .legend { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: .9rem; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: .4rem; }
+  .legend .cell { display: inline-block; cursor: default; }
+
+  /* Remsan: en kolumn per votering, en rad per parti */
+  .strip-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+                padding: 1rem; display: grid; grid-template-columns: 2.2rem 1fr; gap: .5rem; }
+  .rowlabels { display: grid; grid-template-rows: 26px 26px; gap: 4px; padding-top: 0; font-weight: 700; }
+  .rowlabels .s { color: var(--s); } .rowlabels .c { color: var(--c); }
+  .rowlabels div { display: flex; align-items: center; }
+  .scroller { overflow-x: auto; padding-bottom: .5rem; }
+  .strip { display: grid; grid-auto-flow: column; grid-auto-columns: 14px; gap: 3px;
+           grid-template-rows: 26px 26px 6px; width: max-content; }
+  .cell { all: unset; box-sizing: border-box; width: 14px; height: 26px; cursor: pointer;
+          border: 2px solid var(--ink); border-radius: 2px; }
+  .cell:focus-visible { outline: 3px solid var(--diff); outline-offset: 1px; }
+  .cell[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .ja { background: var(--ink); }
+  .nej { background: transparent; }
+  .avstar { background: linear-gradient(135deg, var(--ink) 50%, transparent 50%); }
+  .ingen { border-style: dotted; border-color: var(--muted); background: transparent; }
+  .mark { height: 6px; border-radius: 3px; }
+  .mark.diff { background: var(--diff); }
+
+  .detail { margin-top: 1rem; background: var(--surface); border: 1px solid var(--line);
+            border-radius: 10px; padding: 1rem 1.25rem; min-height: 7rem; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); font-size: .95rem; }
+  th { font-weight: 600; color: var(--muted); }
+  .tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .tablewrap td:first-child, .tablewrap th:first-child { padding-left: 1rem; }
+  .empty { padding: 2rem 1.25rem; background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; }
+  footer { margin-top: 3rem; font-size: .9rem; color: var(--muted); max-width: 70ch; }
+  footer p { margin: .4rem 0; }
+  a { color: inherit; }
+  @media (prefers-reduced-motion: no-preference) { .cell { transition: outline-offset .1s; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Socialdemokraterna och Centerpartiet i voteringarna</h1>
+  <p class="lead" id="sammanfattning">Hämtar data …</p>
+
+  <div class="bar">
+    <div class="legend" aria-label="Teckenförklaring">
+      <span><i class="cell ja" style="width:14px"></i> Ja</span>
+      <span><i class="cell nej" style="width:14px"></i> Nej</span>
+      <span><i class="cell avstar" style="width:14px"></i> Avstår</span>
+      <span><i class="cell ingen" style="width:14px"></i> Ingen tydlig position</span>
+      <span><i class="mark diff" style="width:14px;display:inline-block"></i> Olika position</span>
+    </div>
+  </div>
+
+  <div id="innehall"></div>
+
+  <footer>
+    <p>Partiets position är det alternativ (Ja, Nej eller Avstår) som flest av partiets ledamöter röstade på i voteringen.
+       Frånvarande räknas inte in. Delad position betyder lika många på de två vanligaste alternativen.</p>
+    <p>Endast huvudvoteringar ingår, och beslut som fattats utan votering syns inte.</p>
+    <p>Källa: Sveriges riksdag. Sidan drivs inte av Sveriges riksdag. Senast uppdaterad: <span id="uppdaterad">–</span>.</p>
+  </footer>
+</main>
+
+<script>
+const POSKLASS = { "Ja": "ja", "Nej": "nej", "Avstår": "avstar" };
+const el = (tag, attrs = {}, ...barn) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else e.setAttribute(k, v);
+  }
+  barn.forEach(b => e.append(b));
+  return e;
+};
+const klass = p => POSKLASS[p] || "ingen";
+const beskriv = (c) => {
+  const avg = c.Ja + c.Nej + c["Avstår"];
+  if (!c.position) return "Ingen röstade";
+  if (c.position === "Delad") return `Delad (Ja ${c.Ja}, Nej ${c.Nej}, Avstår ${c["Avstår"]})`;
+  return `${c.position}, ${c[c.position]} av ${avg}`;
+};
+const lika = v => v.S.position && v.S.position === v.C.position;
+
+let data, valt = null;
+
+async function start() {
+  try {
+    const res = await fetch("data.json", { cache: "no-cache" });
+    if (!res.ok) throw new Error(res.status);
+    data = await res.json();
+  } catch (e) {
+    document.getElementById("sammanfattning").textContent =
+      "Kunde inte läsa data.json. Om du öppnat filen direkt från disken: starta en lokal server med “python -m http.server”.";
+    return;
+  }
+  document.getElementById("uppdaterad").textContent =
+    data.uppdaterad ? new Date(data.uppdaterad).toLocaleString("sv-SE") : "ännu inte";
+  rita();
+}
+
+function rita() {
+  const v = data.voteringar;
+  const rms = [...new Set(v.map(x => x.rm))];
+  const omfang = rms.length > 1 ? `Riksmötena ${rms[0]} till ${rms[rms.length - 1]}`
+                                : `Riksmötet ${rms[0] || data.riksmoten[0]}`;
+  const ut = document.getElementById("innehall");
+  const sam = document.getElementById("sammanfattning");
+  ut.replaceChildren();
+  valt = null;
+
+  if (!v.length) {
+    sam.textContent = `Inga voteringar har registrerats för riksmötet ${data.riksmoten[0]} ännu.`;
+    ut.append(el("div", { class: "empty", text: "Sidan hämtar ny data från riksdagen varje natt och fylls på allteftersom riksdagen röstar." }));
+    return;
+  }
+
+  const jamforbara = v.filter(x => x.S.position && x.C.position);
+  const n = jamforbara.filter(lika).length;
+  const andel = jamforbara.length ? Math.round(100 * n / jamforbara.length) : 0;
+  sam.replaceChildren(
+    `${omfang}: partierna hade samma position i `,
+    el("strong", { text: `${n} av ${jamforbara.length}` }),
+    ` voteringar (${andel} %).`
+  );
+
+  // Remsan
+  const strip = el("div", { class: "strip", role: "group", "aria-label": "Voteringar i datumordning" });
+  const rader = { S: [], C: [], M: [] };
+  v.forEach((x, i) => {
+    const mk = p => {
+      const b = el("button", { class: `cell ${klass(x[p].position)}`, type: "button",
+        "aria-pressed": "false", "aria-label": `${x.datum} ${x.bet} punkt ${x.punkt}: ${p} ${beskriv(x[p])}`,
+        title: `${x.datum}, ${x.bet} p. ${x.punkt}` });
+      b.addEventListener("click", () => välj(i, v, strip));
+      return b;
+    };
+    const trio = [mk("S"), mk("C"), el("div", { class: "mark" + (x.S.position && x.C.position && !lika(x) ? " diff" : "") })];
+    if (i > 0 && v[i - 1].rm !== x.rm) trio.forEach(t => t.style.marginLeft = "14px");
+    rader.S.push(trio[0]); rader.C.push(trio[1]); rader.M.push(trio[2]);
+  });
+  // grid-auto-flow: column med tre rader per kolumn
+  v.forEach((_, i) => strip.append(rader.S[i], rader.C[i], rader.M[i]));
+
+  const labels = el("div", { class: "rowlabels" }, el("div", { class: "s", text: "S" }), el("div", { class: "c", text: "C" }));
+  ut.append(el("div", { class: "strip-wrap" }, labels, el("div", { class: "scroller" }, strip)));
+
+  const detalj = el("div", { class: "detail", id: "detalj", "aria-live": "polite" },
+    el("span", { class: "muted", text: "Välj en votering i remsan för att se hur många ledamöter som röstade hur." }));
+  ut.append(detalj);
+
+  // Per riksmöte
+  if (rms.length > 1) {
+    ut.append(el("h2", { text: "Per riksmöte" }));
+    const pt = el("table");
+    pt.append(el("thead", {}, el("tr", {}, ...["Riksmöte", "Voteringar", "Samma position", "Andel"].map(t => el("th", { text: t })))));
+    pt.append(el("tbody", {}, ...rms.map(r => {
+      const g = v.filter(x => x.rm === r && x.S.position && x.C.position);
+      const k = g.filter(lika).length;
+      return el("tr", {}, el("td", { text: r }), el("td", { text: g.length }), el("td", { text: k }),
+                el("td", { text: g.length ? Math.round(100 * k / g.length) + " %" : "–" }));
+    })));
+    ut.append(el("div", { class: "tablewrap" }, pt));
+  }
+
+  // Tabell över skillnader
+  const skil = v.filter(x => x.S.position && x.C.position && !lika(x));
+  ut.append(el("h2", { text: `Voteringar där de skiljer sig (${skil.length})` }));
+  if (!skil.length) {
+    ut.append(el("div", { class: "empty", text: "Partierna har haft samma position i alla voteringar hittills." }));
+  } else {
+    const tb = el("table");
+    tb.append(el("thead", {}, el("tr", {},
+      ...["Datum", "Ärende", "S", "C"].map(t => el("th", { text: t })))));
+    const body = el("tbody");
+    skil.slice().reverse().forEach(x => body.append(el("tr", {},
+      el("td", { text: x.datum }), el("td", { text: `${x.bet} p. ${x.punkt} (${x.rm})` }),
+      el("td", { text: beskriv(x.S) }), el("td", { text: beskriv(x.C) }))));
+    tb.append(body);
+    ut.append(el("div", { class: "tablewrap" }, tb));
+  }
+}
+
+function välj(i, v, strip) {
+  const x = v[i];
+  strip.querySelectorAll(".cell").forEach((c, k) => c.setAttribute("aria-pressed", Math.floor(k / 2) === i ? "true" : "false"));
+  const tb = el("table");
+  tb.append(el("thead", {}, el("tr", {}, ...["Parti", "Ja", "Nej", "Avstår", "Frånvarande"].map(t => el("th", { text: t })))));
+  tb.append(el("tbody", {}, ...["S", "C"].map(p => el("tr", {},
+    el("td", { text: p }), el("td", { text: x[p].Ja }), el("td", { text: x[p].Nej }),
+    el("td", { text: x[p]["Avstår"] }), el("td", { text: x[p]["Frånvarande"] })))));
+  document.getElementById("detalj").replaceChildren(
+    el("strong", { text: `${x.bet}, punkt ${x.punkt}` }),
+    el("div", { class: "muted", text: `${x.datum}, riksmöte ${x.rm}${x.avser ? ", " + x.avser : ""}` }),
+    tb
+  );
+}
+
+start();
+</script>
+</body>
+</html>
