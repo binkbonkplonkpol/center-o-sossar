@@ -85,10 +85,12 @@ def bygg(rm):
             e = voteringar.setdefault(vid, {
                 "id": vid,
                 "rm": rm,
-                "datum": str(r.get("datum") or r.get("systemdatum") or r.get("created") or r.get("publicerad") or "")[:10],
+                "datum": str(r.get("systemdatum") or r.get("datum") or "")[:10],
                 "bet": r.get("beteckning", ""),
                 "punkt": str(r.get("punkt", "")),
                 "avser": r.get("avser", ""),
+                "dok_id": r.get("dok_id", ""),
+                "xml": (r.get("votering_url_xml") or "").replace("http://", "https://"),
             })
             c = e.setdefault(p, {k: 0 for k in RADER})
             c[rost] = c.get(rost, 0) + 1

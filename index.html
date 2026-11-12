@@ -7,12 +7,12 @@
 <style>
   :root {
     --bg: #f3f4f6; --surface: #ffffff; --ink: #15181e; --muted: #5b6470; --line: #d5d9df;
-    --s: #c9162f; --c: #17803f; --diff: #e8a100; --sel: #1d5fd1;
+    --ja: #1f9d55; --nej: #d92d3f; --avstar: #f0c419; --diff: #f07a10; --sel: #1d5fd1;
     box-sizing: border-box;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #14171c; --surface: #1c2027; --ink: #eceef2; --muted: #9aa3b0; --line: #343a44;
-            --s: #ff5a6e; --c: #4cc77d; --diff: #f2b632; --sel: #6db3ff; }
+            --ja: #3ecf79; --nej: #ff5a6e; --avstar: #f5d142; --diff: #ff9a3c; --sel: #6db3ff; }
   }
   *, *::before, *::after { box-sizing: inherit; }
   body { margin: 0; background: var(--bg); color: var(--ink);
@@ -35,7 +35,6 @@
   .strip-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
                 padding: 1rem; display: grid; grid-template-columns: 2.2rem 1fr; gap: .5rem; }
   .rowlabels { display: grid; grid-template-rows: 26px 26px; gap: 4px; padding-top: 0; font-weight: 700; }
-  .rowlabels .s { color: var(--s); } .rowlabels .c { color: var(--c); }
   .rowlabels div { display: flex; align-items: center; }
   .scroller { overflow-x: auto; padding: 6px 6px .75rem; }
   .strip { display: grid; grid-auto-flow: column; grid-auto-columns: 16px; gap: 4px 9px;
@@ -45,9 +44,10 @@
   .cell:hover { box-shadow: 0 0 0 3px var(--sel); }
   .cell:focus-visible { outline: 3px solid var(--sel); outline-offset: 2px; }
   .cell[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 5px var(--sel); position: relative; z-index: 1; }
-  .ja { background: var(--ink); }
-  .nej { background: transparent; }
-  .avstar { background: linear-gradient(135deg, var(--ink) 50%, transparent 50%); }
+  .ja { background: var(--ja); border-color: var(--ja); }
+  .nej { border-color: var(--nej);
+         background: repeating-linear-gradient(135deg, var(--nej) 0 4px, color-mix(in srgb, var(--nej) 55%, var(--surface)) 4px 8px); }
+  .avstar { background: var(--avstar); border-color: var(--avstar); }
   .ingen { border-style: dotted; border-color: var(--muted); background: transparent; }
   .mark { height: 6px; border-radius: 3px; }
   .mark.diff { background: var(--diff); }
@@ -110,6 +110,15 @@ const beskriv = (c) => {
   return `${c.position}, ${c[c.position]} av ${avg}`;
 };
 const lika = v => v.S.position && v.S.position === v.C.position;
+const MANADER = ["januari","februari","mars","april","maj","juni","juli","augusti","september","oktober","november","december"];
+// Beteckningar som "1015-1" tolkas som månad+dag-votering nr (t.ex. 15 oktober, votering 1).
+function namn(x) {
+  const m = /^(\d{2})(\d{2})-(\d+)$/.exec(x.bet || "");
+  if (m && +m[1] >= 1 && +m[1] <= 12 && +m[2] >= 1 && +m[2] <= 31)
+    return `Votering ${m[3]} den ${+m[2]} ${MANADER[+m[1] - 1]}`;
+  return `${x.bet} p. ${x.punkt}`;
+}
+const lank = (url, text) => el("a", { href: url, target: "_blank", rel: "noopener", text });
 
 let data, valt = null;
 
@@ -159,8 +168,8 @@ function rita() {
   v.forEach((x, i) => {
     const mk = p => {
       const b = el("button", { class: `cell ${klass(x[p].position)}`, type: "button",
-        "aria-pressed": "false", "aria-label": `${x.datum} ${x.bet} punkt ${x.punkt}: ${p} ${beskriv(x[p])}`,
-        title: `${x.datum}, ${x.bet} p. ${x.punkt}` });
+        "aria-pressed": "false", "aria-label": `${namn(x)}: ${p} ${beskriv(x[p])}`,
+        title: namn(x) });
       b.addEventListener("click", () => välj(i, v, strip));
       return b;
     };
@@ -200,11 +209,12 @@ function rita() {
   } else {
     const tb = el("table");
     tb.append(el("thead", {}, el("tr", {},
-      ...["Datum", "Ärende", "S", "C"].map(t => el("th", { text: t })))));
+      ...["Datum", "Votering", "S", "C", "Källa"].map(t => el("th", { text: t })))));
     const body = el("tbody");
     skil.slice().reverse().forEach(x => body.append(el("tr", {},
-      el("td", { text: x.datum }), el("td", { text: `${x.bet} p. ${x.punkt} (${x.rm})` }),
-      el("td", { text: beskriv(x.S) }), el("td", { text: beskriv(x.C) }))));
+      el("td", { text: x.datum }), el("td", { text: rms.length > 1 ? `${namn(x)} (${x.rm})` : namn(x) }),
+      el("td", { text: beskriv(x.S) }), el("td", { text: beskriv(x.C) }),
+      el("td", {}, x.xml ? lank(x.xml, "Röstdata") : ""))));
     tb.append(body);
     ut.append(el("div", { class: "tablewrap" }, tb));
   }
@@ -219,9 +229,10 @@ function välj(i, v, strip) {
     el("td", { text: p }), el("td", { text: x[p].Ja }), el("td", { text: x[p].Nej }),
     el("td", { text: x[p]["Avstår"] }), el("td", { text: x[p]["Frånvarande"] })))));
   document.getElementById("detalj").replaceChildren(
-    el("strong", { text: `${x.bet}, punkt ${x.punkt}` }),
-    el("div", { class: "muted", text: `${x.datum}, riksmöte ${x.rm}${x.avser ? ", " + x.avser : ""}` }),
-    tb
+    el("strong", { text: namn(x) }),
+    el("div", { class: "muted", text: `${x.datum}, riksmöte ${x.rm}${x.avser ? ", " + x.avser : ""}. Beteckning: ${x.bet}` }),
+    tb,
+    x.xml ? el("p", {}, lank(x.xml, "Visa röstdata hos riksdagen")) : ""
   );
 }
 
