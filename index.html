@@ -283,15 +283,20 @@ function rita() {
 
   // Markerade voteringar med filter
   const sel = el("select", { id: "filter", "aria-label": "Filtrera markerade voteringar" },
-    el("option", { value: "alla", text: "Alla markerade" }),
+    el("option", { value: "mot", text: "Olika position + Röstar med SD" }),
+    el("option", { value: "alla", text: "Alla voteringar" }),
     ...["olika", "sd", "blandad"].map(k => el("option", { value: k, text: KAT[k].namn })));
+  sel.value = "mot";
   const rubrik = el("h2", { id: "tabellrubrik" });
   const behallare = el("div", { id: "tabell" });
   ut.append(el("div", { class: "bar", style: "margin-top:2.5rem" }, rubrik, sel), behallare);
   const ritaTabell = () => {
     const f = sel.value;
-    const rader = visad.filter(x => ["olika", "sd", "blandad"].includes(x.kat) && (f === "alla" || x.kat === f));
-    rubrik.textContent = `Markerade voteringar (${rader.length})`;
+    const passar = x => f === "mot" ? (x.kat === "olika" || x.kat === "sd")
+      : f === "alla" ? true
+      : x.kat === f;
+    const rader = visad.filter(passar);
+    rubrik.textContent = `${f === "alla" ? "Alla" : "Markerade"} voteringar (${rader.length})`;
     behallare.replaceChildren();
     if (!rader.length) {
       behallare.append(el("div", { class: "empty", text: "Inga voteringar matchar filtret." }));
