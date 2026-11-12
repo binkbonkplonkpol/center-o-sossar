@@ -1,15 +1,167 @@
 {
  "kalla": "Sveriges riksdag",
- "uppdaterad": null,
+ "uppdaterad": "2026-11-12T09:34:13+00:00",
  "partier": [
   "S",
   "C"
  ],
  "riksmoten": [
-  "2026/27",
-  "2027/28",
-  "2028/29",
-  "2029/30"
+  "2026/27"
  ],
- "voteringar": []
+ "voteringar": [
+  {
+   "id": "3C26FA04-DAA4-4E03-B135-C55FD0B8567F",
+   "rm": "2026/27",
+   "datum": "",
+   "bet": "1015-1",
+   "punkt": "0",
+   "avser": "frågan",
+   "S": {
+    "Ja": 99,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   },
+   "C": {
+    "Ja": 0,
+    "Nej": 25,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Nej"
+   }
+  },
+  {
+   "id": "1B990602-1D92-432B-A378-E867376E0A6B",
+   "rm": "2026/27",
+   "datum": "",
+   "bet": "1103-1",
+   "punkt": "0",
+   "avser": "frågan",
+   "S": {
+    "Ja": 0,
+    "Nej": 99,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Nej"
+   },
+   "C": {
+    "Ja": 25,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   }
+  },
+  {
+   "id": "D41FD97A-5F61-4320-A5AE-B64AF39D8CBC",
+   "rm": "2026/27",
+   "datum": "",
+   "bet": "FöU2",
+   "punkt": "2",
+   "avser": "sakfrågan",
+   "S": {
+    "Ja": 99,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   },
+   "C": {
+    "Ja": 25,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   }
+  },
+  {
+   "id": "F21A5C48-FA78-4414-9602-4495A63C75DE",
+   "rm": "2026/27",
+   "datum": "",
+   "bet": "KU4",
+   "punkt": "1",
+   "avser": "sakfrågan",
+   "S": {
+    "Ja": 99,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   },
+   "C": {
+    "Ja": 25,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   }
+  },
+  {
+   "id": "5DE56842-83CE-4DD2-B5FF-CF4C54E1EC09",
+   "rm": "2026/27",
+   "datum": "",
+   "bet": "KU6",
+   "punkt": "1",
+   "avser": "sakfrågan",
+   "S": {
+    "Ja": 99,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   },
+   "C": {
+    "Ja": 23,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 2,
+    "position": "Ja"
+   }
+  },
+  {
+   "id": "E80584EC-68E4-4618-9765-34DFE3C3B525",
+   "rm": "2026/27",
+   "datum": "",
+   "bet": "KU6",
+   "punkt": "3",
+   "avser": "sakfrågan",
+   "S": {
+    "Ja": 99,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   },
+   "C": {
+    "Ja": 23,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 2,
+    "position": "Ja"
+   }
+  },
+  {
+   "id": "A4FFC05D-04B4-4139-A9EB-A0ED698B0443",
+   "rm": "2026/27",
+   "datum": "",
+   "bet": "KU9",
+   "punkt": "1",
+   "avser": "sakfrågan",
+   "S": {
+    "Ja": 99,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 0,
+    "position": "Ja"
+   },
+   "C": {
+    "Ja": 23,
+    "Nej": 0,
+    "Avstår": 0,
+    "Frånvarande": 2,
+    "position": "Ja"
+   }
+  }
+ ]
 }
