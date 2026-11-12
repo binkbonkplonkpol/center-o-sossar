@@ -1,21 +1,23 @@
 """
-Hämtar voteringsdata för S och C från Sveriges riksdag (data.riksdagen.se)
-och skriver data.json. Endast standardbiblioteket används.
+Hämtar voteringsdata för S, C, V, MP och SD från Sveriges riksdag
+(data.riksdagen.se) och skriver data.json. Endast standardbiblioteket används.
 
 Källa: Sveriges riksdag
 """
 import json
 import time
-import xml.etree.ElementTree as ET
 import datetime as dt
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 BASE = "https://data.riksdagen.se/voteringlista/"
-PARTIER = ["S", "C"]
+PARTIER = ["S", "C", "V", "MP", "SD"]
+KARNA = ["S", "C"]              # en votering tas med om dessa båda finns
 FORSTA_RIKSMOTE = 2026          # 2026/27
 SISTA_RIKSMOTE = 2029           # 2029/30 (mandatperiodens sista)
+SZ = 10000                      # max antal rader per anrop
 UT = Path(__file__).parent / "data.json"
 RADER = ("Ja", "Nej", "Avstår", "Frånvarande")
 
@@ -25,18 +27,6 @@ def riksmoten():
     senaste = nu.year if nu.month >= 9 else nu.year - 1
     senaste = min(max(senaste, FORSTA_RIKSMOTE), SISTA_RIKSMOTE)
     return [f"{y}/{str(y + 1)[2:]}" for y in range(FORSTA_RIKSMOTE, senaste + 1)]
-
-
-def get_json(url, forsok=3):
-    for i in range(forsok):
-        try:
-            req = Request(url, headers={"User-Agent": "s-c-voteringar/1.0"})
-            with urlopen(req, timeout=60) as r:
-                return json.load(r)
-        except Exception:
-            if i == forsok - 1:
-                raise
-            time.sleep(3 * (i + 1))
 
 
 def get_bytes(url, forsok=3):
@@ -49,6 +39,10 @@ def get_bytes(url, forsok=3):
             if i == forsok - 1:
                 raise
             time.sleep(3 * (i + 1))
+
+
+def get_json(url):
+    return json.loads(get_bytes(url))
 
 
 def hamta_meta(vid):
@@ -65,24 +59,35 @@ def hamta_meta(vid):
     return {"titel": t("titel"), "datum": t("datum")[:10], "html": t("dokument_url_html")}
 
 
-def hamta(rm, parti):
-    url = BASE + "?" + urlencode(
-        {"rm": rm, "parti": parti, "sz": 10000, "utformat": "json"}
-    )
-    rader, antal = [], None
+def _hamta_url(rm, parti, valkrets=None):
+    q = {"rm": rm, "parti": parti, "sz": SZ, "utformat": "json"}
+    if valkrets:
+        q["valkrets"] = valkrets
+    url = BASE + "?" + urlencode(q)
+    rader = []
     while url:
         d = get_json(url)["voteringlista"]
-        if antal is None:
-            antal = int(d.get("@antal", 0) or 0)
         v = d.get("votering") or []
         rader += [v] if isinstance(v, dict) else v
         url = d.get("@nasta_sida") or None
-    if len(rader) < antal:
-        raise RuntimeError(
-            f"{parti} {rm}: fick {len(rader)} av {antal} rader. "
-            "Svaret är trunkerat; delning av anropet krävs."
-        )
     return rader
+
+
+def hamta(rm, parti):
+    rader = _hamta_url(rm, parti)
+    if len(rader) < SZ:
+        return rader
+    # Svaret nådde taket och kan vara avkortat: dela upp per valkrets.
+    print(f"{parti} {rm}: {len(rader)} rader nådde taket, delar upp per valkrets.")
+    prov = _hamta_url(rm, parti)
+    valkretsar = sorted({r.get("valkrets", "") for r in prov if r.get("valkrets")})
+    ut = []
+    for vk in valkretsar:
+        d = _hamta_url(rm, parti, valkrets=vk)
+        if len(d) >= SZ:
+            raise RuntimeError(f"{parti} {rm} {vk}: även delat svar nådde taket ({SZ}).")
+        ut += d
+    return ut
 
 
 def position(c):
@@ -98,9 +103,16 @@ visat_falt = []
 
 
 def bygg(rm):
+    per_parti = {p: hamta(rm, p) for p in PARTIER}
+
+    # Kontroll: alla partier ska ha rader för lika många voteringar.
+    antal = {p: len({r.get("votering_id") for r in rader}) for p, rader in per_parti.items()}
+    if len(set(antal.values())) > 1:
+        print(f"VARNING {rm}: olika antal voteringar per parti: {antal}")
+
     voteringar = {}
-    for p in PARTIER:
-        for r in hamta(rm, p):
+    for p, rader in per_parti.items():
+        for r in rader:
             if not visat_falt:
                 print("Fält i svaret:", sorted(r))
                 visat_falt.append(1)
@@ -112,7 +124,7 @@ def bygg(rm):
             e = voteringar.setdefault(vid, {
                 "id": vid,
                 "rm": rm,
-                "datum": str(r.get("systemdatum") or r.get("datum") or "")[:10],
+                "datum": str(r.get("systemdatum") or "")[:10],
                 "bet": r.get("beteckning", ""),
                 "punkt": str(r.get("punkt", "")),
                 "avser": r.get("avser", ""),
@@ -121,11 +133,13 @@ def bygg(rm):
             })
             c = e.setdefault(p, {k: 0 for k in RADER})
             c[rost] = c.get(rost, 0) + 1
+
     ut = []
     for e in voteringar.values():
-        if all(p in e for p in PARTIER):
+        if all(p in e for p in KARNA):
             for p in PARTIER:
-                e[p]["position"] = position(e[p])
+                if p in e:
+                    e[p]["position"] = position(e[p])
             ut.append(e)
     ut.sort(key=lambda e: (e["datum"], e["bet"], e["punkt"]))
     return ut

@@ -3,43 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>S och C i voteringarna</title>
+<title>Så röstar S, C, V, MP och SD</title>
 <style>
   :root {
     --bg: #f3f4f6; --surface: #ffffff; --ink: #15181e; --muted: #5b6470; --line: #d5d9df;
-    --ja: #1f9d55; --nej: #d92d3f; --avstar: #f0c419; --diff: #f07a10; --sel: #1d5fd1;
+    --ja: #1f9d55; --nej: #d92d3f; --avstar: #f0c419; --sel: #1d5fd1;
+    --diff: #f07a10; --sd: #c1121f; --bland: #f0c419;
     box-sizing: border-box;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #14171c; --surface: #1c2027; --ink: #eceef2; --muted: #9aa3b0; --line: #343a44;
-            --ja: #3ecf79; --nej: #ff5a6e; --avstar: #f5d142; --diff: #ff9a3c; --sel: #6db3ff; }
+            --ja: #3ecf79; --nej: #ff5a6e; --avstar: #f5d142; --sel: #6db3ff;
+            --diff: #ff9a3c; --sd: #ff4d5e; --bland: #f5d142; }
   }
   *, *::before, *::after { box-sizing: inherit; }
   body { margin: 0; background: var(--bg); color: var(--ink);
          font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 64rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  main { max-width: 68rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
   h1 { font-size: clamp(1.8rem, 4.5vw, 2.8rem); line-height: 1.1; letter-spacing: -0.02em;
        margin: 0 0 .75rem; font-weight: 700; max-width: 22ch; }
   h2 { font-size: 1.1rem; margin: 2.5rem 0 .75rem; letter-spacing: -0.005em; }
-  .lead { font-size: 1.15rem; max-width: 60ch; margin: 0 0 1.5rem; }
+  .lead { font-size: 1.15rem; max-width: 62ch; margin: 0 0 1.5rem; }
   .lead strong { font-variant-numeric: tabular-nums; }
   .muted { color: var(--muted); }
-  .bar { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; margin: 0 0 1rem; }
+  .bar { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; align-items: center; margin: 0 0 1rem; }
+  .bar h2 { margin: 0; }
   select { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--line);
            border-radius: 6px; padding: .35rem .6rem; }
-  .legend { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: .9rem; color: var(--muted); }
+  .legend { display: flex; gap: .5rem 1.25rem; flex-wrap: wrap; font-size: .9rem; color: var(--muted); margin: 0 0 1rem; }
   .legend span { display: inline-flex; align-items: center; gap: .4rem; }
-  .legend .cell { display: inline-block; cursor: default; }
 
-  /* Remsan: en kolumn per votering, en rad per parti */
+  /* Remsan: en kolumn per votering, en rad per parti, och en markering under */
   .strip-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
-                padding: 1rem; display: grid; grid-template-columns: 2.2rem 1fr; gap: .5rem; }
-  .rowlabels { display: grid; grid-template-rows: 26px 26px; gap: 4px; padding-top: 0; font-weight: 700; }
+                padding: 1rem; display: grid; grid-template-columns: 2.6rem 1fr; gap: .5rem; }
+  .rowlabels { display: grid; grid-template-rows: repeat(5, 20px); gap: 4px; padding-top: 6px;
+               font-weight: 700; font-size: .85rem; }
   .rowlabels div { display: flex; align-items: center; }
   .scroller { overflow-x: auto; padding: 6px 6px .75rem; }
   .strip { display: grid; grid-auto-flow: column; grid-auto-columns: 16px; gap: 4px 9px;
-           grid-template-rows: 26px 26px 6px; width: max-content; }
-  .cell { all: unset; box-sizing: border-box; width: 16px; height: 26px; cursor: pointer;
+           grid-template-rows: repeat(5, 20px) 8px; width: max-content; }
+  .cell { all: unset; box-sizing: border-box; width: 16px; height: 20px; cursor: pointer;
           border: 2px solid var(--ink); border-radius: 2px; }
   .cell:hover { box-shadow: 0 0 0 3px var(--sel); }
   .cell:focus-visible { outline: 3px solid var(--sel); outline-offset: 2px; }
@@ -49,37 +52,47 @@
          background: repeating-linear-gradient(135deg, var(--nej) 0 4px, color-mix(in srgb, var(--nej) 55%, var(--surface)) 4px 8px); }
   .avstar { background: var(--avstar); border-color: var(--avstar); }
   .ingen { border-style: dotted; border-color: var(--muted); background: transparent; }
-  .mark { height: 6px; border-radius: 3px; }
+  .mark { height: 8px; border-radius: 4px; }
   .mark.diff { background: var(--diff); }
+  .mark.sd { background: var(--sd); }
+  .mark.bland { background: var(--bland); }
+  .mark.ej { border: 1px dotted var(--muted); }
+  .legend .cell { display: inline-block; cursor: default; width: 14px; }
+  .legend .cell:hover { box-shadow: none; }
+  .legend .mark { display: inline-block; width: 18px; }
 
   .detail { margin-top: 1rem; background: var(--surface); border: 1px solid var(--line);
             border-radius: 10px; padding: 1rem 1.25rem; min-height: 7rem; }
+  .detail p { margin: .5rem 0 0; }
   table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
-  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); font-size: .95rem; }
-  th { font-weight: 600; color: var(--muted); }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); font-size: .95rem; vertical-align: top; }
+  th { font-weight: 600; color: var(--muted); white-space: nowrap; }
   .tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
   .tablewrap td:first-child, .tablewrap th:first-child { padding-left: 1rem; }
+  .sw { display: inline-block; width: 18px; height: 8px; border-radius: 4px; margin-right: .5rem; vertical-align: middle; }
+  .sw.lika { border: 1px solid var(--line); background: transparent; }
+  .sw.diff { background: var(--diff); } .sw.sd { background: var(--sd); }
+  .sw.bland { background: var(--bland); } .sw.ej { border: 1px dotted var(--muted); }
   .empty { padding: 2rem 1.25rem; background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; }
-  footer { margin-top: 3rem; font-size: .9rem; color: var(--muted); max-width: 70ch; }
+  footer { margin-top: 3rem; font-size: .9rem; color: var(--muted); max-width: 72ch; }
   footer p { margin: .4rem 0; }
   a { color: inherit; }
-  @media (prefers-reduced-motion: no-preference) { .cell { transition: outline-offset .1s; } }
 </style>
 </head>
 <body>
 <main>
-  <h1>Socialdemokraterna och Centerpartiet i voteringarna</h1>
+  <h1>Så röstar S, C, V, MP och SD i voteringarna</h1>
   <p class="lead" id="sammanfattning">Hämtar data …</p>
 
-  <div class="bar">
-    <div class="legend" aria-label="Teckenförklaring">
-      <span><i class="cell ja" style="width:14px"></i> Ja</span>
-      <span><i class="cell nej" style="width:14px"></i> Nej</span>
-      <span><i class="cell avstar" style="width:14px"></i> Avstår</span>
-      <span><i class="cell ingen" style="width:14px"></i> Ingen tydlig position</span>
-      <span><i class="mark diff" style="width:14px;display:inline-block"></i> Olika position</span>
-      <span><i class="cell ja" style="width:14px;box-shadow:0 0 0 2px var(--surface),0 0 0 5px var(--sel);margin:0 4px"></i> Vald votering</span>
-    </div>
+  <div class="legend" aria-label="Teckenförklaring">
+    <span><i class="cell ja"></i> Ja</span>
+    <span><i class="cell nej"></i> Nej</span>
+    <span><i class="cell avstar"></i> Avstår</span>
+    <span><i class="cell ingen"></i> Ingen tydlig position</span>
+    <span><i class="mark diff"></i> Olika position</span>
+    <span><i class="mark sd"></i> Röstar med SD</span>
+    <span><i class="mark bland"></i> Blandad röstning</span>
+    <span><i class="cell ja" style="box-shadow:0 0 0 2px var(--surface),0 0 0 5px var(--sel);margin:0 4px"></i> Vald votering</span>
   </div>
 
   <div id="innehall"></div>
@@ -87,13 +100,26 @@
   <footer>
     <p>Partiets position är det alternativ (Ja, Nej eller Avstår) som flest av partiets ledamöter röstade på i voteringen.
        Frånvarande räknas inte in. Delad position betyder lika många på de två vanligaste alternativen.</p>
+    <p>Markeringen under varje votering: ingen markering när S, C, V och MP röstar lika. <em>Olika position</em> när S, V och MP röstar lika men C annorlunda.
+       <em>Röstar med SD</em> när S, V och MP röstar lika, C annorlunda och SD som C. <em>Blandad röstning</em> när S, V och MP inte röstar lika.
+       Voteringar där något av S, C, V eller MP saknar tydlig position räknas inte med.</p>
     <p>Endast huvudvoteringar ingår, och beslut som fattats utan votering syns inte.</p>
     <p>Källa: Sveriges riksdag. Sidan drivs inte av Sveriges riksdag. Senast uppdaterad: <span id="uppdaterad">–</span>.</p>
   </footer>
 </main>
 
 <script>
+const PARTIER = ["S", "C", "V", "MP", "SD"];
 const POSKLASS = { "Ja": "ja", "Nej": "nej", "Avstår": "avstar" };
+const KAT = {
+  lika:    { namn: "Alla lika",        besk: "S, C, V och MP röstar lika",                                  klass: "lika" },
+  olika:   { namn: "Olika position",   besk: "S, V och MP röstar lika, C annorlunda",                       klass: "diff" },
+  sd:      { namn: "Röstar med SD",    besk: "S, V och MP röstar lika, C annorlunda och SD röstar som C",   klass: "sd" },
+  blandad: { namn: "Blandad röstning", besk: "S, V och MP röstar inte lika",                                klass: "bland" },
+  ej:      { namn: "Ej jämförbar",     besk: "Något av S, C, V eller MP saknar tydlig position",            klass: "ej" },
+};
+const MANADER = ["januari","februari","mars","april","maj","juni","juli","augusti","september","oktober","november","december"];
+
 const el = (tag, attrs = {}, ...barn) => {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -102,16 +128,30 @@ const el = (tag, attrs = {}, ...barn) => {
   barn.forEach(b => e.append(b));
   return e;
 };
-const klass = p => POSKLASS[p] || "ingen";
-const beskriv = (c) => {
+const lank = (url, text) => el("a", { href: url, target: "_blank", rel: "noopener", text });
+const pos = (x, p) => (x[p] && x[p].position) || null;
+const klass = (x, p) => POSKLASS[pos(x, p)] || "ingen";
+const OK = p => p === "Ja" || p === "Nej" || p === "Avstår";
+
+function beskriv(c) {
+  if (!c) return "Saknas";
   const avg = c.Ja + c.Nej + c["Avstår"];
   if (!c.position) return "Ingen röstade";
   if (c.position === "Delad") return `Delad (Ja ${c.Ja}, Nej ${c.Nej}, Avstår ${c["Avstår"]})`;
   return `${c.position}, ${c[c.position]} av ${avg}`;
-};
-const lika = v => v.S.position && v.S.position === v.C.position;
-const MANADER = ["januari","februari","mars","april","maj","juni","juli","augusti","september","oktober","november","december"];
-// Beteckningar som "1015-1" tolkas som månad+dag-votering nr (t.ex. 15 oktober, votering 1).
+}
+
+function kategori(x) {
+  const [s, c, v, mp, sd] = ["S", "C", "V", "MP", "SD"].map(p => pos(x, p));
+  if (![s, c, v, mp].every(OK)) return "ej";
+  if (s === v && s === mp) {
+    if (c === s) return "lika";
+    return OK(sd) && sd === c ? "sd" : "olika";
+  }
+  return "blandad";
+}
+
+// Beteckningar som "1015-1" tolkas som månad+dag-votering nr om titel saknas.
 function namn(x) {
   if (x.titel) return x.titel;
   const m = /^(\d{2})(\d{2})-(\d+)$/.exec(x.bet || "");
@@ -119,9 +159,8 @@ function namn(x) {
     return `Votering ${m[3]} den ${+m[2]} ${MANADER[+m[1] - 1]}`;
   return `${x.bet} p. ${x.punkt}`;
 }
-const lank = (url, text) => el("a", { href: url, target: "_blank", rel: "noopener", text });
 
-let data, valt = null;
+let data;
 
 async function start() {
   try {
@@ -140,13 +179,13 @@ async function start() {
 
 function rita() {
   const v = data.voteringar;
+  v.forEach(x => x.kat = kategori(x));
   const rms = [...new Set(v.map(x => x.rm))];
   const omfang = rms.length > 1 ? `Riksmötena ${rms[0]} till ${rms[rms.length - 1]}`
                                 : `Riksmötet ${rms[0] || data.riksmoten[0]}`;
   const ut = document.getElementById("innehall");
   const sam = document.getElementById("sammanfattning");
   ut.replaceChildren();
-  valt = null;
 
   if (!v.length) {
     sam.textContent = `Inga voteringar har registrerats för riksmötet ${data.riksmoten[0]} ännu.`;
@@ -154,84 +193,105 @@ function rita() {
     return;
   }
 
-  const jamforbara = v.filter(x => x.S.position && x.C.position);
-  const n = jamforbara.filter(lika).length;
-  const andel = jamforbara.length ? Math.round(100 * n / jamforbara.length) : 0;
+  const antal = k => v.filter(x => x.kat === k).length;
+  const jfr = v.length - antal("ej");
+  const procent = n => jfr ? Math.round(100 * n / jfr) + " %" : "–";
   sam.replaceChildren(
-    `${omfang}: partierna hade samma position i `,
-    el("strong", { text: `${n} av ${jamforbara.length}` }),
-    ` voteringar (${andel} %).`
+    `${omfang}: S, C, V och MP hade samma position i `,
+    el("strong", { text: `${antal("lika")} av ${jfr}` }),
+    ` jämförbara voteringar (${procent(antal("lika"))}).`
   );
 
   // Remsan
   const strip = el("div", { class: "strip", role: "group", "aria-label": "Voteringar i datumordning" });
-  const rader = { S: [], C: [], M: [] };
   v.forEach((x, i) => {
-    const mk = p => {
-      const b = el("button", { class: `cell ${klass(x[p].position)}`, type: "button",
-        "aria-pressed": "false", "aria-label": `${namn(x)}: ${p} ${beskriv(x[p])}`,
-        title: namn(x) });
-      b.addEventListener("click", () => välj(i, v, strip));
+    const celler = PARTIER.map(p => {
+      const b = el("button", { class: `cell ${klass(x, p)}`, type: "button", "aria-pressed": "false",
+        "aria-label": `${namn(x)}: ${p} ${beskriv(x[p])}`, title: namn(x) });
+      b.addEventListener("click", () => välj(i, strip));
       return b;
-    };
-    const trio = [mk("S"), mk("C"), el("div", { class: "mark" + (x.S.position && x.C.position && !lika(x) ? " diff" : "") })];
-    if (i > 0 && v[i - 1].rm !== x.rm) trio.forEach(t => t.style.marginLeft = "14px");
-    rader.S.push(trio[0]); rader.C.push(trio[1]); rader.M.push(trio[2]);
+    });
+    const m = el("div", { class: `mark ${KAT[x.kat].klass}`, role: "img", "aria-label": KAT[x.kat].namn, title: KAT[x.kat].namn });
+    const nytt = i > 0 && v[i - 1].rm !== x.rm;
+    [...celler, m].forEach(t => { if (nytt) t.style.marginLeft = "14px"; strip.append(t); });
   });
-  // grid-auto-flow: column med tre rader per kolumn
-  v.forEach((_, i) => strip.append(rader.S[i], rader.C[i], rader.M[i]));
-
-  const labels = el("div", { class: "rowlabels" }, el("div", { class: "s", text: "S" }), el("div", { class: "c", text: "C" }));
+  const labels = el("div", { class: "rowlabels" }, ...PARTIER.map(p => el("div", { text: p })));
   ut.append(el("div", { class: "strip-wrap" }, labels, el("div", { class: "scroller" }, strip)));
+  ut.append(el("div", { class: "detail", id: "detalj", "aria-live": "polite" },
+    el("span", { class: "muted", text: "Välj en votering i remsan för att se hur många ledamöter som röstade hur." })));
 
-  const detalj = el("div", { class: "detail", id: "detalj", "aria-live": "polite" },
-    el("span", { class: "muted", text: "Välj en votering i remsan för att se hur många ledamöter som röstade hur." }));
-  ut.append(detalj);
+  // Sammanfattning per kategori
+  ut.append(el("h2", { text: "Fördelning" }));
+  const kt = el("table");
+  kt.append(el("thead", {}, el("tr", {}, ...["Kategori", "Antal", "Andel", "Beskrivning"].map(t => el("th", { text: t })))));
+  kt.append(el("tbody", {}, ...["lika", "olika", "sd", "blandad"].map(k => el("tr", {},
+    el("td", {}, el("span", { class: `sw ${KAT[k].klass}` }), KAT[k].namn),
+    el("td", { text: antal(k) }), el("td", { text: procent(antal(k)) }),
+    el("td", { class: "muted", text: KAT[k].besk })))));
+  ut.append(el("div", { class: "tablewrap" }, kt));
+  if (antal("ej")) ut.append(el("p", { class: "muted", text: `${antal("ej")} voteringar saknar tydlig position för något av S, C, V eller MP och räknas inte med.` }));
 
   // Per riksmöte
   if (rms.length > 1) {
     ut.append(el("h2", { text: "Per riksmöte" }));
     const pt = el("table");
-    pt.append(el("thead", {}, el("tr", {}, ...["Riksmöte", "Voteringar", "Samma position", "Andel"].map(t => el("th", { text: t })))));
+    pt.append(el("thead", {}, el("tr", {}, ...["Riksmöte", "Jämförbara", "Alla lika", "Olika position", "Röstar med SD", "Blandad"].map(t => el("th", { text: t })))));
     pt.append(el("tbody", {}, ...rms.map(r => {
-      const g = v.filter(x => x.rm === r && x.S.position && x.C.position);
-      const k = g.filter(lika).length;
-      return el("tr", {}, el("td", { text: r }), el("td", { text: g.length }), el("td", { text: k }),
-                el("td", { text: g.length ? Math.round(100 * k / g.length) + " %" : "–" }));
+      const g = v.filter(x => x.rm === r && x.kat !== "ej");
+      const n = k => g.filter(x => x.kat === k).length;
+      return el("tr", {}, el("td", { text: r }), el("td", { text: g.length }), el("td", { text: n("lika") }),
+        el("td", { text: n("olika") }), el("td", { text: n("sd") }), el("td", { text: n("blandad") }));
     })));
     ut.append(el("div", { class: "tablewrap" }, pt));
   }
 
-  // Tabell över skillnader
-  const skil = v.filter(x => x.S.position && x.C.position && !lika(x));
-  ut.append(el("h2", { text: `Voteringar där de skiljer sig (${skil.length})` }));
-  if (!skil.length) {
-    ut.append(el("div", { class: "empty", text: "Partierna har haft samma position i alla voteringar hittills." }));
-  } else {
+  // Markerade voteringar med filter
+  const sel = el("select", { id: "filter", "aria-label": "Filtrera markerade voteringar" },
+    el("option", { value: "alla", text: "Alla markerade" }),
+    ...["olika", "sd", "blandad"].map(k => el("option", { value: k, text: KAT[k].namn })));
+  const rubrik = el("h2", { id: "tabellrubrik" });
+  const behallare = el("div", { id: "tabell" });
+  ut.append(el("div", { class: "bar", style: "margin-top:2.5rem" }, rubrik, sel), behallare);
+  const ritaTabell = () => {
+    const f = sel.value;
+    const rader = v.filter(x => ["olika", "sd", "blandad"].includes(x.kat) && (f === "alla" || x.kat === f)).reverse();
+    rubrik.textContent = `Markerade voteringar (${rader.length})`;
+    behallare.replaceChildren();
+    if (!rader.length) {
+      behallare.append(el("div", { class: "empty", text: "Inga voteringar matchar filtret." }));
+      return;
+    }
     const tb = el("table");
-    tb.append(el("thead", {}, el("tr", {},
-      ...["Datum", "Votering", "S", "C", "Källa"].map(t => el("th", { text: t })))));
-    const body = el("tbody");
-    skil.slice().reverse().forEach(x => body.append(el("tr", {},
-      el("td", { text: x.datum }), el("td", { text: rms.length > 1 ? `${namn(x)} (${x.rm})` : namn(x) }),
-      el("td", { text: beskriv(x.S) }), el("td", { text: beskriv(x.C) }),
-      el("td", {}, (x.html || x.xml) ? lank(x.html || x.xml, "Öppna") : ""))));
-    tb.append(body);
-    ut.append(el("div", { class: "tablewrap" }, tb));
-  }
+    tb.append(el("thead", {}, el("tr", {}, ...["Datum", "Votering", "Kategori", ...PARTIER, "Källa"].map(t => el("th", { text: t })))));
+    tb.append(el("tbody", {}, ...rader.map(x => el("tr", {},
+      el("td", { text: x.datum }),
+      el("td", { text: rms.length > 1 ? `${namn(x)} (${x.rm})` : namn(x) }),
+      el("td", {}, el("span", { class: `sw ${KAT[x.kat].klass}` }), KAT[x.kat].namn),
+      ...PARTIER.map(p => el("td", { text: pos(x, p) || "–" })),
+      el("td", {}, (x.html || x.xml) ? lank(x.html || x.xml, "Öppna") : "")))));
+    behallare.append(el("div", { class: "tablewrap" }, tb));
+  };
+  sel.addEventListener("change", ritaTabell);
+  ritaTabell();
+
+  // Visa senaste voteringarna först i remsan
+  const sc = ut.querySelector(".scroller");
+  sc.scrollLeft = sc.scrollWidth;
 }
 
-function välj(i, v, strip) {
-  const x = v[i];
-  strip.querySelectorAll(".cell").forEach((c, k) => c.setAttribute("aria-pressed", Math.floor(k / 2) === i ? "true" : "false"));
+function välj(i, strip) {
+  const x = data.voteringar[i];
+  strip.querySelectorAll(".cell").forEach((c, k) =>
+    c.setAttribute("aria-pressed", Math.floor(k / PARTIER.length) === i ? "true" : "false"));
   const tb = el("table");
   tb.append(el("thead", {}, el("tr", {}, ...["Parti", "Ja", "Nej", "Avstår", "Frånvarande"].map(t => el("th", { text: t })))));
-  tb.append(el("tbody", {}, ...["S", "C"].map(p => el("tr", {},
+  tb.append(el("tbody", {}, ...PARTIER.filter(p => x[p]).map(p => el("tr", {},
     el("td", { text: p }), el("td", { text: x[p].Ja }), el("td", { text: x[p].Nej }),
     el("td", { text: x[p]["Avstår"] }), el("td", { text: x[p]["Frånvarande"] })))));
   document.getElementById("detalj").replaceChildren(
     el("strong", { text: namn(x) }),
     el("div", { class: "muted", text: `${x.datum}, riksmöte ${x.rm}${x.avser ? ", " + x.avser : ""}. Beteckning: ${x.bet}` }),
+    el("p", {}, el("span", { class: `sw ${KAT[x.kat].klass}` }), KAT[x.kat].namn),
     tb,
     (x.html || x.xml) ? el("p", {}, lank(x.html || x.xml, "Visa hos riksdagen")) : ""
   );
