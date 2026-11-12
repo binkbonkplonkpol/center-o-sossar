@@ -3,18 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Så röstar S, C, V, MP och SD</title>
+<title>Centersveket</title>
 <style>
   :root {
     --bg: #f3f4f6; --surface: #ffffff; --ink: #15181e; --muted: #5b6470; --line: #d5d9df;
     --ja: #1f9d55; --nej: #d92d3f; --avstar: #f0c419; --sel: #1d5fd1;
     --diff: #f07a10; --sd: #c1121f; --bland: #f0c419;
+    --cgron: #009933; --brun: #7a4a21;
     box-sizing: border-box;
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #14171c; --surface: #1c2027; --ink: #eceef2; --muted: #9aa3b0; --line: #343a44;
             --ja: #3ecf79; --nej: #ff5a6e; --avstar: #f5d142; --sel: #6db3ff;
-            --diff: #ff9a3c; --sd: #ff4d5e; --bland: #f5d142; }
+            --diff: #ff9a3c; --sd: #ff4d5e; --bland: #f5d142;
+            --cgron: #1fb44f; --brun: #c4915f; }
   }
   *, *::before, *::after { box-sizing: inherit; }
   body { margin: 0; background: var(--bg); color: var(--ink);
@@ -22,6 +24,8 @@
   main { max-width: 68rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
   h1 { font-size: clamp(1.8rem, 4.5vw, 2.8rem); line-height: 1.1; letter-spacing: -0.02em;
        margin: 0 0 .75rem; font-weight: 700; max-width: 22ch; }
+  .t-c { color: var(--cgron); } .t-sv { color: var(--brun); }
+  .sub { margin: 0 0 1.25rem; color: var(--muted); }
   h2 { font-size: 1.1rem; margin: 2.5rem 0 .75rem; letter-spacing: -0.005em; }
   .lead { font-size: 1.15rem; max-width: 62ch; margin: 0 0 1.5rem; }
   .lead strong { font-variant-numeric: tabular-nums; }
@@ -81,7 +85,7 @@
 </head>
 <body>
 <main>
-  <h1>Så röstar S, C, V, MP och SD i voteringarna</h1>
+  <h1><span class="t-c">Center</span><span class="t-sv">sveket</span></h1>
   <p class="lead" id="sammanfattning">Hämtar data …</p>
 
   <div class="legend" aria-label="Teckenförklaring">
@@ -178,7 +182,7 @@ function namn(x) {
   return `${x.bet} p. ${x.punkt}`;
 }
 
-let data;
+let data, visad = [];
 
 async function start() {
   try {
@@ -199,8 +203,6 @@ function rita() {
   const v = data.voteringar;
   v.forEach(x => x.kat = kategori(x));
   const rms = [...new Set(v.map(x => x.rm))];
-  const omfang = rms.length > 1 ? `Riksmötena ${rms[0]} till ${rms[rms.length - 1]}`
-                                : `Riksmötet ${rms[0] || data.riksmoten[0]}`;
   const ut = document.getElementById("innehall");
   const sam = document.getElementById("sammanfattning");
   ut.replaceChildren();
@@ -214,15 +216,31 @@ function rita() {
   const antal = k => v.filter(x => x.kat === k).length;
   const jfr = v.length - antal("ej");
   const procent = n => jfr ? Math.round(100 * n / jfr) + " %" : "–";
-  sam.replaceChildren(
-    `${omfang}: S, C, V och MP hade samma position i `,
-    el("strong", { text: `${antal("lika")} av ${jfr}` }),
-    ` jämförbara voteringar (${procent(antal("lika"))}).`
-  );
+  const mot = antal("olika") + antal("sd");
+  const senaste = v.map(x => x.datum).filter(Boolean).sort().pop() || "–";
+  if (!jfr) {
+    sam.textContent = "Riksdagen 2026–2030: inga jämförbara voteringar ännu.";
+  } else {
+    sam.replaceChildren(
+      "Riksdagen 2026–2030: C röstade emot de rödgröna i ",
+      el("strong", { text: `${mot} av ${jfr}` }),
+      ` jämförbara voteringar (${procent(mot)}). I `,
+      el("strong", { text: `${antal("sd")} av ${jfr}` }),
+      ` voteringar röstade de med SD (${procent(antal("sd"))}).`,
+      el("div", { class: "muted", style: "font-size:.9rem;margin-top:.4rem",
+        text: `De rödgröna är S, V och MP när de röstar lika. Omfattar voteringar till och med ${senaste}.` })
+    );
+  }
 
-  // Remsan
-  const strip = el("div", { class: "strip", role: "group", "aria-label": "Voteringar i datumordning" });
-  v.forEach((x, i) => {
+  // Remsan: Röstar med SD först, sedan Olika position, Blandad röstning och sist resten.
+  // Inom varje grupp visas de senaste voteringarna först.
+  const PRIO = { sd: 0, olika: 1, blandad: 2, lika: 3, ej: 4 };
+  visad = [...v].sort((a, b) =>
+    PRIO[a.kat] - PRIO[b.kat] ||
+    (b.datum || "").localeCompare(a.datum || "") ||
+    (b.bet || "").localeCompare(a.bet || ""));
+  const strip = el("div", { class: "strip", role: "group", "aria-label": "Voteringar sorterade efter markering" });
+  visad.forEach((x, i) => {
     const celler = PARTIER.map(p => {
       const b = el("button", { class: `cell ${klass(x, p)}`, type: "button", "aria-pressed": "false",
         "aria-label": `${namn(x)}: ${p} ${beskriv(x[p])}`, title: namn(x) });
@@ -230,7 +248,7 @@ function rita() {
       return b;
     });
     const m = el("div", { class: `mark ${KAT[x.kat].klass}`, role: "img", "aria-label": KAT[x.kat].namn, title: KAT[x.kat].namn });
-    const nytt = i > 0 && v[i - 1].rm !== x.rm;
+    const nytt = i > 0 && PRIO[visad[i - 1].kat] !== PRIO[x.kat];
     [...celler, m].forEach(t => { if (nytt) t.style.marginLeft = "14px"; strip.append(t); });
   });
   const labels = el("div", { class: "rowlabels" }, ...PARTIER.map(p => el("div", { text: p })));
@@ -272,7 +290,7 @@ function rita() {
   ut.append(el("div", { class: "bar", style: "margin-top:2.5rem" }, rubrik, sel), behallare);
   const ritaTabell = () => {
     const f = sel.value;
-    const rader = v.filter(x => ["olika", "sd", "blandad"].includes(x.kat) && (f === "alla" || x.kat === f)).reverse();
+    const rader = visad.filter(x => ["olika", "sd", "blandad"].includes(x.kat) && (f === "alla" || x.kat === f));
     rubrik.textContent = `Markerade voteringar (${rader.length})`;
     behallare.replaceChildren();
     if (!rader.length) {
@@ -292,13 +310,11 @@ function rita() {
   sel.addEventListener("change", ritaTabell);
   ritaTabell();
 
-  // Visa senaste voteringarna först i remsan
-  const sc = ut.querySelector(".scroller");
-  sc.scrollLeft = sc.scrollWidth;
+  ut.querySelector(".scroller").scrollLeft = 0;
 }
 
 function välj(i, strip) {
-  const x = data.voteringar[i];
+  const x = visad[i];
   strip.querySelectorAll(".cell").forEach((c, k) =>
     c.setAttribute("aria-pressed", Math.floor(k / PARTIER.length) === i ? "true" : "false"));
   const tb = el("table");
