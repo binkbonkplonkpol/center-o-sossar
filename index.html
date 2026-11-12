@@ -101,8 +101,9 @@
     <p>Partiets position är det alternativ (Ja, Nej eller Avstår) som flest av partiets ledamöter röstade på i voteringen.
        Frånvarande räknas inte in. Delad position betyder lika många på de två vanligaste alternativen.</p>
     <p>Markeringen under varje votering: ingen markering när S, C, V och MP röstar lika. <em>Olika position</em> när S, V och MP röstar lika men C annorlunda.
-       <em>Röstar med SD</em> när S, V och MP röstar lika, C annorlunda och SD som C. <em>Blandad röstning</em> när S, V och MP inte röstar lika.
+       <em>Röstar med SD</em> när S, V och MP röstar lika och C röstar med SD. <em>Blandad röstning</em> när S, V och MP inte röstar lika.
        Voteringar där något av S, C, V eller MP saknar tydlig position räknas inte med.</p>
+    <p>Siffrorna i tabellen visar hur många av partiets avgivna röster som gick till partiets position, till exempel “Ja (98/99)”. Länken <em>Röstsiffror</em> går till riksdagens egen sida för voteringen med röster per parti och per ledamot.</p>
     <p>Endast huvudvoteringar ingår, och beslut som fattats utan votering syns inte.</p>
     <p>Källa: Sveriges riksdag. Sidan drivs inte av Sveriges riksdag. Senast uppdaterad: <span id="uppdaterad">–</span>.</p>
   </footer>
@@ -114,7 +115,7 @@ const POSKLASS = { "Ja": "ja", "Nej": "nej", "Avstår": "avstar" };
 const KAT = {
   lika:    { namn: "Alla lika",        besk: "S, C, V och MP röstar lika",                                  klass: "lika" },
   olika:   { namn: "Olika position",   besk: "S, V och MP röstar lika, C annorlunda",                       klass: "diff" },
-  sd:      { namn: "Röstar med SD",    besk: "S, V och MP röstar lika, C annorlunda och SD röstar som C",   klass: "sd" },
+  sd:      { namn: "Röstar med SD",    besk: "S, V och MP röstar lika, C röstar med SD",                   klass: "sd" },
   blandad: { namn: "Blandad röstning", besk: "S, V och MP röstar inte lika",                                klass: "bland" },
   ej:      { namn: "Ej jämförbar",     besk: "Något av S, C, V eller MP saknar tydlig position",            klass: "ej" },
 };
@@ -129,7 +130,24 @@ const el = (tag, attrs = {}, ...barn) => {
   return e;
 };
 const lank = (url, text) => el("a", { href: url, target: "_blank", rel: "noopener", text });
+// Riksdagens egen sida för voteringen, med röstsiffror per parti och alla ledamotsröster.
+const rostsida = x => x.dok_id
+  ? `https://www.riksdagen.se/sv/dokument-och-lagar/dokument/_${encodeURIComponent(x.dok_id)}/` : null;
+const lankar = x => {
+  const u = rostsida(x);
+  const ut = [];
+  if (u) ut.push(lank(u, "Röstsiffror"));
+  if (x.html) ut.push(lank(x.html, "Ärende"));
+  if (!ut.length && x.xml) ut.push(lank(x.xml, "Rådata"));
+  return ut.flatMap((l, i) => i ? [" ", l] : [l]);
+};
 const pos = (x, p) => (x[p] && x[p].position) || null;
+// Kort text med röstsiffror, t.ex. "Ja (98/99)".
+function kort(c) {
+  if (!c || !c.position) return "–";
+  if (c.position === "Delad") return "Delad";
+  return `${c.position} (${c[c.position]}/${c.Ja + c.Nej + c["Avstår"]})`;
+}
 const klass = (x, p) => POSKLASS[pos(x, p)] || "ingen";
 const OK = p => p === "Ja" || p === "Nej" || p === "Avstår";
 
@@ -262,13 +280,13 @@ function rita() {
       return;
     }
     const tb = el("table");
-    tb.append(el("thead", {}, el("tr", {}, ...["Datum", "Votering", "Kategori", ...PARTIER, "Källa"].map(t => el("th", { text: t })))));
+    tb.append(el("thead", {}, el("tr", {}, ...["Datum", "Votering", "Kategori", ...PARTIER, "Länkar"].map(t => el("th", { text: t })))));
     tb.append(el("tbody", {}, ...rader.map(x => el("tr", {},
       el("td", { text: x.datum }),
       el("td", { text: rms.length > 1 ? `${namn(x)} (${x.rm})` : namn(x) }),
       el("td", {}, el("span", { class: `sw ${KAT[x.kat].klass}` }), KAT[x.kat].namn),
-      ...PARTIER.map(p => el("td", { text: pos(x, p) || "–" })),
-      el("td", {}, (x.html || x.xml) ? lank(x.html || x.xml, "Öppna") : "")))));
+      ...PARTIER.map(p => el("td", { text: kort(x[p]) })),
+      el("td", {}, ...lankar(x))))));
     behallare.append(el("div", { class: "tablewrap" }, tb));
   };
   sel.addEventListener("change", ritaTabell);
@@ -293,7 +311,7 @@ function välj(i, strip) {
     el("div", { class: "muted", text: `${x.datum}, riksmöte ${x.rm}${x.avser ? ", " + x.avser : ""}. Beteckning: ${x.bet}` }),
     el("p", {}, el("span", { class: `sw ${KAT[x.kat].klass}` }), KAT[x.kat].namn),
     tb,
-    (x.html || x.xml) ? el("p", {}, lank(x.html || x.xml, "Visa hos riksdagen")) : ""
+    (x.dok_id || x.html || x.xml) ? el("p", {}, ...lankar(x)) : ""
   );
 }
 
