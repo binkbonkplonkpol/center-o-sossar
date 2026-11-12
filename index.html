@@ -113,6 +113,7 @@ const lika = v => v.S.position && v.S.position === v.C.position;
 const MANADER = ["januari","februari","mars","april","maj","juni","juli","augusti","september","oktober","november","december"];
 // Beteckningar som "1015-1" tolkas som månad+dag-votering nr (t.ex. 15 oktober, votering 1).
 function namn(x) {
+  if (x.titel) return x.titel;
   const m = /^(\d{2})(\d{2})-(\d+)$/.exec(x.bet || "");
   if (m && +m[1] >= 1 && +m[1] <= 12 && +m[2] >= 1 && +m[2] <= 31)
     return `Votering ${m[3]} den ${+m[2]} ${MANADER[+m[1] - 1]}`;
@@ -214,7 +215,7 @@ function rita() {
     skil.slice().reverse().forEach(x => body.append(el("tr", {},
       el("td", { text: x.datum }), el("td", { text: rms.length > 1 ? `${namn(x)} (${x.rm})` : namn(x) }),
       el("td", { text: beskriv(x.S) }), el("td", { text: beskriv(x.C) }),
-      el("td", {}, x.xml ? lank(x.xml, "Röstdata") : ""))));
+      el("td", {}, (x.html || x.xml) ? lank(x.html || x.xml, "Öppna") : ""))));
     tb.append(body);
     ut.append(el("div", { class: "tablewrap" }, tb));
   }
@@ -232,7 +233,7 @@ function välj(i, v, strip) {
     el("strong", { text: namn(x) }),
     el("div", { class: "muted", text: `${x.datum}, riksmöte ${x.rm}${x.avser ? ", " + x.avser : ""}. Beteckning: ${x.bet}` }),
     tb,
-    x.xml ? el("p", {}, lank(x.xml, "Visa röstdata hos riksdagen")) : ""
+    (x.html || x.xml) ? el("p", {}, lank(x.html || x.xml, "Visa hos riksdagen")) : ""
   );
 }
 
